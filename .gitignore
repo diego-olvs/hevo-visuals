@@ -10,7 +10,6 @@ lerna-debug.log*
 node_modules
 dist
 .env
-public/hero/hero-dj.mp4
 dist-ssr
 *.local
 
