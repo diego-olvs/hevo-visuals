@@ -189,6 +189,27 @@ const allImages = sections.flatMap((section) =>
 function RawPostSlider({ raw, post, title }) {
   const [value, setValue] = useState(50);
 
+  function updateSlider(clientX, element) {
+    const rect = element.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const percent = (x / rect.width) * 100;
+    const clamped = Math.min(100, Math.max(35, percent));
+    setValue(clamped);
+  }
+
+  function handlePointerDown(event) {
+    updateSlider(event.clientX, event.currentTarget);
+
+    if (event.currentTarget.setPointerCapture) {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+  }
+
+  function handlePointerMove(event) {
+    if (event.pointerType !== "touch" && event.buttons !== 1) return;
+    updateSlider(event.clientX, event.currentTarget);
+  }
+
   return (
     <div className="rawPost">
       <div className="rawPostText">
@@ -196,29 +217,23 @@ function RawPostSlider({ raw, post, title }) {
         <h3>{title}</h3>
       </div>
 
-      <div className="compare">
+      <div
+        className="compare"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+      >
         <div className="compareBase">
-          <img src={raw} alt="RAW" />
+          <img src={raw} alt="RAW" draggable="false" />
         </div>
 
         <div className="compareEdited" style={{ width: `${value}%` }}>
-          <img src={post} alt="POST" />
+          <img src={post} alt="POST" draggable="false" />
         </div>
 
         <div className="compareLine" style={{ left: `${value}%` }} />
         <div className="compareHandle" style={{ left: `calc(${value}% - 20px)` }}>
           ↔
         </div>
-
-        <input
-          type="range"
-          min="35"
-          max="100"
-          value={value}
-          onChange={(event) => setValue(Number(event.target.value))}
-          className="compareRange"
-          aria-label="Comparador RAW vs POST"
-        />
       </div>
 
       <div className="rawPostLabels">
@@ -773,6 +788,9 @@ export default function App() {
           height: min(64vh, 620px);
           overflow: hidden;
           background: #000;
+          touch-action: none;
+          user-select: none;
+          cursor: ew-resize;
         }
 
         .compareBase,
@@ -780,6 +798,7 @@ export default function App() {
           position: absolute;
           inset: 0;
           overflow: hidden;
+          pointer-events: none;
         }
 
         .compareBase img,
@@ -791,6 +810,8 @@ export default function App() {
           object-fit: contain;
           background: #000;
           padding: 18px;
+          pointer-events: none;
+          user-select: none;
         }
 
         .compareEdited {
@@ -804,6 +825,7 @@ export default function App() {
           width: 1px;
           background: rgba(255,255,255,0.82);
           z-index: 3;
+          pointer-events: none;
         }
 
         .compareHandle {
@@ -821,16 +843,8 @@ export default function App() {
           backdrop-filter: blur(8px);
           color: white;
           font-size: 16px;
-        }
-
-        .compareRange {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          opacity: 0;
-          cursor: ew-resize;
-          z-index: 5;
+          pointer-events: none;
+          user-select: none;
         }
 
         .rawPostLabels {
