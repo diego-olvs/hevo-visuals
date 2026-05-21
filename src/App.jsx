@@ -274,7 +274,8 @@ function ProjectBlock({ project, onOpenImage }) {
             <img
               src={image.src}
               alt=""
-              loading="lazy"
+              loading="eager"
+              decoding="async"
               style={{ objectPosition: image.position || "center center" }}
             />
           </button>
